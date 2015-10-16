@@ -26,14 +26,6 @@
 
 class TaxRule extends TaxRuleCore
 {
-    public $id_tax_rules_group;
-    public $id_country;
-    public $id_state;
-    public $zipcode_from;
-    public $zipcode_to;
-    public $id_tax;
-    public $behavior;
-    public $description;
     public $id_group;
 
     /**
@@ -55,33 +47,6 @@ class TaxRule extends TaxRuleCore
         ),
     );
 
-    protected $webserviceParameters = array(
-        'fields' => array(
-            'id_tax_rules_group' => array('xlink_resource' => 'tax_rule_groups'),
-            'id_state' => array('xlink_resource' => 'states'),
-            'id_country' => array('xlink_resource' => 'countries'),
-        ),
-    );
-
-    public static function deleteByGroupId($id_group)
-    {
-        if (empty($id_group)) {
-            die(Tools::displayError());
-        }
-
-        return Db::getInstance()->execute('
-        DELETE FROM `'._DB_PREFIX_.'tax_rule`
-        WHERE `id_tax_rules_group` = '.(int) $id_group
-        );
-    }
-
-    public static function retrieveById($id_tax_rule)
-    {
-        return Db::getInstance()->getRow('
-    	SELECT * FROM `'._DB_PREFIX_.'tax_rule`
-    	WHERE `id_tax_rule` = '.(int) $id_tax_rule);
-    }
-
     public static function getTaxRulesByGroupId($id_lang, $id_group)
     {
         return Db::getInstance()->executeS('
@@ -101,84 +66,6 @@ class TaxRule extends TaxRuleCore
 		LEFT JOIN `'._DB_PREFIX_.'tax` t ON (g.`id_tax` = t.`id_tax`)
 		WHERE `id_tax_rules_group` = '.(int) $id_group.'
 		ORDER BY `country_name` ASC, `state_name` ASC, `zipcode_from` ASC, `zipcode_to` ASC'
-        );
-    }
-
-    public static function deleteTaxRuleByIdTax($id_tax)
-    {
-        return Db::getInstance()->execute('
-        DELETE FROM `'._DB_PREFIX_.'tax_rule`
-        WHERE `id_tax` = '.(int) $id_tax
-        );
-    }
-
-    /**
-     * @deprecated since 1.5
-     */
-    public static function deleteTaxRuleByIdCounty($id_county)
-    {
-        Tools::displayAsDeprecated();
-
-        return true;
-    }
-
-    /**
-     * @param int $id_tax
-     *
-     * @return bool
-     */
-    public static function isTaxInUse($id_tax)
-    {
-        $cache_id = 'TaxRule::isTaxInUse_'.(int) $id_tax;
-        if (!Cache::isStored($cache_id)) {
-            $result = (int) Db::getInstance()->getValue('SELECT COUNT(*) FROM `'._DB_PREFIX_.'tax_rule` WHERE `id_tax` = '.(int) $id_tax);
-            Cache::store($cache_id, $result);
-        }
-
-        return Cache::retrieve($cache_id);
-    }
-
-    /**
-     * @param string $zipcode a range of zipcode (eg: 75000 / 75000-75015)
-     *
-     * @return array an array containing two zipcode ordered by zipcode
-     */
-    public function breakDownZipCode($zip_codes)
-    {
-        $zip_codes = preg_split('/-/', $zip_codes);
-
-        $from = $zip_codes[0];
-        $to = isset($zip_codes[1]) ? $zip_codes[1] : 0;
-        if (count($zip_codes) == 2) {
-            $from = $zip_codes[0];
-            $to = $zip_codes[1];
-            if ($zip_codes[0] > $zip_codes[1]) {
-                $from = $zip_codes[1];
-                $to = $zip_codes[0];
-            } elseif ($zip_codes[0] == $zip_codes[1]) {
-                $from = $zip_codes[0];
-                $to = 0;
-            }
-        } elseif (count($zip_codes) == 1) {
-            $from = $zip_codes[0];
-            $to = 0;
-        }
-
-        return array($from, $to);
-    }
-
-    /**
-     * Replace a tax_rule id by an other one in the tax_rule table.
-     *
-     * @param int $old_id
-     * @param int $new_id
-     */
-    public static function swapTaxId($old_id, $new_id)
-    {
-        return Db::getInstance()->execute('
-		UPDATE `'._DB_PREFIX_.'tax_rule`
-		SET `id_tax` = '.(int) $new_id.'
-		WHERE `id_tax` = '.(int) $old_id
         );
     }
 }
