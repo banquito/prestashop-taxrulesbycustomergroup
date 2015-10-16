@@ -1,4 +1,9 @@
 <?php
+/**
+*  @author Cooperativa Banquito <info@banquito.com.ar>
+*  @license GNU/GPL version 3
+*  @website http://www.banquito.com.ar
+*/
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -76,7 +81,7 @@ class taxrulesbycustomergroup extends Module
                 'dest' => 'override/controllers/admin/AdminTaxRulesGroupController.php',
                 ),
             'form.tpl' => array(
-                'source' => 'override/controllers/admin/templates/tax_rules/helpers/form/form.tpl',
+                'source' => 'views/templates/admin/tax_rules/helpers/form/form.tpl',
                 'dest' => 'override/controllers/admin/templates/tax_rules/helpers/form/form.tpl',
                 ),
             );
